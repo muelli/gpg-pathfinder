@@ -1,4 +1,9 @@
 import MySQLdb
+import re
+import locale
+
+locale.setlocale(locale.LC_CTYPE, "")
+encoding = locale.nl_langinfo(locale.CODESET)
 
 _DB = None
 
@@ -103,6 +108,47 @@ def create_task(target, trusted):
     cursor.close()
     _DB.commit()
     return task
+
+def get_name(key_id):
+    """Return the uid of a key, if available in database.
+    Return None if not available.
+    """
+
+    assert key_id > 0
+
+    cursor = _DB.cursor()
+    cursor.execute('select name from key_uids where key_id = %s limit 1', key_id)
+    row = cursor.fetchone()
+    cursor.close()
+    _DB.commit()
+    if row is None:
+        return None
+    else:
+        return row[0].decode('utf-8', 'replace').encode(encoding, 'replace')
+
+def get_key(name):
+    """Return a key from key id or name
+    """
+
+    if re.search("^(0x)?[0-9a-fA-F]{8}$", name):
+        return long(name, 16)
+
+    # Assume UTF-8 in database
+    uname = unicode(name, encoding, 'replace').encode('utf-8', 'replace')
+    # Replace whitespace and , with SQL wildcard %
+    uname = re.sub("^|\s+|,+|$", "%", uname)
+
+    cursor = _DB.cursor()
+    cursor.execute("select key_id from key_uids where name LIKE %s limit 1",\
+                   uname)
+    row = cursor.fetchone()
+    cursor.close()
+    _DB.commit()
+    if row is None:
+        return None
+    else:
+        print 'Using "%s" -> 0x%08X (%s)' % (name, row[0], get_name(row[0]))
+        return long(row[0])
 
 def need_key(task, key_id, distance):
     """Enqueue a request for a key.
@@ -357,7 +403,7 @@ def insert_sigs_of_key(task, key_id, limit):
                     row)
         if row[3] < limit:
             if need_key(task, row[2], row[3]):
-                print "Scheduling check of 0x%08X" % row[2]
+                print "Scheduling check of 0x%08X (%s)" % (row[2], get_name(row[2]))
                 ins.execute('insert into task_unchecked'
                             ' (taskno, key_id, distance)'
                             ' values'

@@ -69,7 +69,7 @@ def find_path(target, trusted, forbidden_keys = []):
             key_id = fetched_key(keyfetcher)
             fetched_keys += 1
             pending_keys -= 1
-            print "Got 0x%08X" % key_id
+            print "Got 0x%08X (%s)" % (key_id, pathdb.get_name(key_id))
         else:
             print "Processing 0x%08X" % key_id
         path, new_keys = pathdb.insert_sigs_of_key(task, key_id, limit)
@@ -87,6 +87,12 @@ def print_path(path):
         for k in path:
             print "0x%08X" % k,
         print
+        print
+        for k in path:
+            print "0x%08X" % k, pathdb.get_name(k)
+        print
+
+
 
 def doit():
     print "Starting"
@@ -123,10 +129,9 @@ def cert():
 
 if __name__ == '__main__':
     pathdb.init()
-    trusted = 0xD294608EL
-    target = long(sys.argv[1], 16)
+    target = pathdb.get_key(sys.argv[1])
     forbidden = []
     for f in sys.argv[2:]:
-        forbidden.append(long(f, 16))
-    print_path(find_path(target, trusted, forbidden))
+        forbidden.append(pathdb.get_key(f))
+    print_path(find_path(target, gpgpathconfig.trusted, forbidden))
     
