@@ -1,3 +1,4 @@
+import sys
 import socket
 
 import pgppathconfig
@@ -62,10 +63,15 @@ def find_path(target, trusted, forbidden_keys = []):
     fetched_keys = 0
     while pending_keys > 0:
         print "Pending: %d Fetched: %d" % (pending_keys, fetched_keys),
-        key_id = fetched_key(keyfetcher)
-        fetched_keys += 1
-        pending_keys -= 1
-        print "Got 0x%08X" % key_id
+        sys.stdout.flush()
+        key_id = pathdb.unchecked_key(task)
+        if key_id == None:
+            key_id = fetched_key(keyfetcher)
+            fetched_keys += 1
+            pending_keys -= 1
+            print "Got 0x%08X" % key_id
+        else:
+            print "Processing 0x%08X" % key_id
         path, new_keys = pathdb.insert_sigs_of_key(task, key_id, limit)
         if path != None:
             return path
@@ -94,7 +100,6 @@ if __name__ == '__main__':
     print "Horowitz..."
     print_path(find_path(0x1CF27FD5L, 0x9AA2E311L))
     print "Trojnara"
-    print_path(find_path(0x74C732D1L, 0x9AA2E311L, [
-    	0xFB5E1519L, 0x4413B691L]))
+    print_path(find_path(0x74C732D1L, 0x9AA2E311L, [0xFB5E1519L, 0x4413B691L]))
     print_path(find_path(0x20B19259L, 0xD294608EL, []))
     print "Done"
