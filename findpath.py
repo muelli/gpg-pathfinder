@@ -3,6 +3,9 @@ import socket
 import pgppathconfig
 import pathdb
 
+def fetched_key(keyfetcher):
+    return long(keyfetcher.recv(10), 16)
+
 def find_path(target, trusted):
     assert target > 0
     assert trusted > 0
@@ -25,8 +28,9 @@ def find_path(target, trusted):
     if target != trusted and pathdb.need_key(task, trusted, 0) == 0:
         pending.append(trusted)
     while len(pending) > 0:
-        pending.remove(long(keyfetcher.recv(64), 16))
+        pending.remove(fetched_key(keyfetcher))
 
+    # Can we find a path without fetching a new key?
     target_dist = 0
     trust_dist = 0
     limit = 10
@@ -51,6 +55,21 @@ def find_path(target, trusted):
             break
         target_dist += 1
 
+    # No path found in local database.  Fetch keys.
+    pending_keys = pathdb.request_keys(task, limit)
+    fetched_keys = 0
+    while pending_keys > 0:
+        print "Pending: %d Fetched: %d" % (pending_keys, fetched_keys),
+        key_id = fetched_key(keyfetcher)
+        fetched_keys += 1
+        pending_keys -= 1
+        print "Got 0x%08X" % key_id
+        path = pathdb.insert_sigs_of_key(task, key_id)
+        if path != None:
+            return path
+
+    return None
+
 
 def print_path(path):
     if path == None:
@@ -67,4 +86,5 @@ if __name__ == '__main__':
     print_path(find_path(0xF9036141L, 0xF9036141L))
     print_path(find_path(0x9AA2E311L, 0x94514BBDL))
     print_path(find_path(0x9AA2E311L, 0x57D395E1L))
+    print_path(find_path(0xED2354B9L, 0x9AA2E311L))
     print "Done"
