@@ -354,7 +354,7 @@ def insert_sigs_of_key(task, key_id, limit):
                     row)
         if row[3] < limit:
             if need_key(task, row[2], row[3]):
-                print "Scheduling check of 0x%08X" % key_id
+                print "Scheduling check of 0x%08X" % row[2]
                 ins.execute('insert into task_unchecked'
                             ' (taskno, key_id, distance)'
                             ' values'
