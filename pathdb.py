@@ -230,6 +230,7 @@ def extend_target(task, target_dist):
                     (task, row[0], row[1], target_dist))
     # print "Extending... done."
     reader.close()
+    sel.close()
     ins.close()
     _DB.commit()
     return count
@@ -268,6 +269,36 @@ def extend_trust(task, trust_dist):
                     (task, row[0], row[1], trust_dist))
     # print "Ext trust... done."
     reader.close()
+    sel.close()
     ins.close()
     _DB.commit()
     return count
+
+def request_keys(task, distance_limit):
+    cursor = _DB.cursor()
+    cursor.execute('lock tables keys_needed write,'
+                   ' key_info read, task_target read')
+    print "Requesting..."
+    cursor.execute('select %s, task_target.signed_by, task_target.distance + 1'
+                   ' from task_target'
+                   ' left join key_info'
+                   ' on task_target.signed_by = key_info.key_id'
+                   ' where key_info.key_id is null'
+                   ' and task_target.taskno = %s'
+                   ' and task_target.distance < %s',
+                   (task, task, distance_limit - 1))
+    rows = cursor.fetchall()
+    if len(rows) > 0:
+        print "Found:", len(rows)
+        cursor.executemany('insert into keys_needed (taskno, key_id, distance)'
+                           ' values (%s, %s, %s)',
+                           rows)
+    else:
+        print "None found"
+    cursor.execute('unlock tables')
+    cursor.close()
+    _DB.commit()
+    return len(rows)
+
+def insert_sigs_of_key(task, key_id):
+    print "Simulating that 0x%08X has no sigs" % key_id
