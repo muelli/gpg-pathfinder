@@ -165,34 +165,44 @@ def best_match_found(taskno, target_dist, trust_dist):
         best_trust = row[2]
         result = [best_target, middle, best_trust]
 
+        # print "Match found.  Middle: 0x%08X 0x%08X 0x%08X" % tuple(result)
+
         if target_dist == 0:
             assert best_target == 0
             del result[0]
+            best_target = middle
+            # print "(left removed)"
         if trust_dist == 0:
             assert best_trust == 0
             del result[-1]
+            best_trust = middle
+            # print "(right removed)"
 
         while target_dist > 1:
             cursor.execute('select key_id from task_target'
                            ' where signed_by = %s and distance = %s'
+                           ' and taskno = %s'
                            ' limit 1',
-                           (best_target, target_dist - 1))
+                           (best_target, target_dist - 1, taskno))
             row = cursor.fetchone()
             assert row != None
             best_target = row[0]
             result.insert(0, best_target)
             target_dist -= 1
+            # print "(left added: 0x%08X)" % best_target
 
         while trust_dist > 1:
-            cursor.execute('select signed_by from task_trust'
+            cursor.execute('select signed_by from task_trusted'
                            ' where key_id = %s and distance = %s'
+                           ' and taskno = %s'
                            ' limit 1',
-                           (best_trust, trust_dist - 1))
+                           (best_trust, trust_dist - 1, taskno))
             row = cursor.fetchone()
             assert row != None
             best_trust = row[0]
-            result.append(best_target)
+            result.append(best_trust)
             trust_dist -= 1
+            # print "(right added: 0x%08X)" % best_trust
     cursor.close()
     _DB.commit()
     return result
@@ -220,6 +230,13 @@ def extend_target(task, target_dist):
         sel_row = sel.fetchone()
         if sel_row[0] > 0:
             # print "Extending With 0x%08X 0x%08X -- not!" % (row[0], row[1])
+            continue
+        sel.execute('select count(*) from task_forbidden'
+                    ' where key_id = %s and taskno = %s',
+                    (row[1], task))
+        sel_row = sel.fetchone()
+        if sel_row[0] > 0:
+            # print "Extending With 0x%08X 0x%08X -- bad!" % (row[0], row[1])
             continue
         count += 1
         # print "Extending With 0x%08X 0x%08X" % (row[0], row[1])
@@ -260,6 +277,14 @@ def extend_trust(task, trust_dist):
         if sel_row[0] > 0:
             # print "Ext trust with 0x%08X 0x%08X -- not!" % (row[0], row[1])
             continue
+        sel.execute('select count(*) from task_forbidden'
+                    ' where key_id = %s and taskno = %s',
+                    (row[0], task))
+        sel_row = sel.fetchone()
+        if sel_row[0] > 0:
+            # print "Ext trust with 0x%08X 0x%08X -- bad!" % (row[0], row[1])
+            continue
+
         count += 1
         # print "Ext trust with 0x%08X 0x%08X" % (row[0], row[1])
         ins.execute('insert into task_trusted'
@@ -278,7 +303,7 @@ def request_keys(task, distance_limit):
     cursor = _DB.cursor()
     cursor.execute('lock tables keys_needed write,'
                    ' key_info read, task_target read')
-    print "Requesting..."
+    # print "Requesting..."
     cursor.execute('select %s, task_target.signed_by, task_target.distance + 1'
                    ' from task_target'
                    ' left join key_info'
@@ -289,16 +314,38 @@ def request_keys(task, distance_limit):
                    (task, task, distance_limit - 1))
     rows = cursor.fetchall()
     if len(rows) > 0:
-        print "Found:", len(rows)
+        # print "Found:", len(rows)
         cursor.executemany('insert into keys_needed (taskno, key_id, distance)'
                            ' values (%s, %s, %s)',
                            rows)
     else:
-        print "None found"
+        # print "None found"
+        pass
     cursor.execute('unlock tables')
     cursor.close()
     _DB.commit()
     return len(rows)
 
-def insert_sigs_of_key(task, key_id):
+def insert_sigs_of_key(task, key_id, limit):
     print "Simulating that 0x%08X has no sigs" % key_id
+    # Insert signatures into task_trusted.
+    # Check for new overlap.
+    # Insert signatures into task_target.
+    # Check for new overlap.
+    # Find the transitive shell of task_trusted and task_target,
+    # checking for new overlap and inserting keys into
+    # keys_soon_needed as we go.
+    # Extend keys_needed with new keys found not present during
+    # signature insertion into task_target and task_trusted.
+    # Move keys_soon_needed to keys_needed.
+    return (None, 0)
+
+def task_forbidden_keys(task, forbidden_keys):
+    # print "FORBIDDING", task, forbidden_keys
+    if len(forbidden_keys) > 0:
+        cursor = _DB.cursor()
+        cursor.executemany('insert into task_forbidden (taskno, key_id)'
+                           ' values (' + str(task) + ', %s)',
+                           zip(forbidden_keys))
+        cursor.close()
+        _DB.commit()
