@@ -17,11 +17,9 @@ def toploop(listenfd):
             # New client.
             timeout = 0
             client = listenfd.accept()[0]
-            print "Connect", client
             client.send("who-are-you\n")
             task = int(string.strip(client.recv(64)))
             client.send("hello\n")
-            print "Task:", task
             pathdb.activate_task(task)
             sessions[task] = client
         if len(sessions) == 0:
@@ -32,7 +30,6 @@ def toploop(listenfd):
             if sessions[task].fileno() in r:
                 # Dead client.
                 pathdb.deactivate_task(task)
-                print "Close", task, sessions[task]
                 sessions[task].close()
                 del sessions[task]
 
@@ -45,16 +42,17 @@ def toploop(listenfd):
                 timeout *= 2
                 if timeout > 30:
                     timeout = 30
-            print "Nothing to do.  Sleeping", timeout, "seconds"
             continue
-
+        assert key_id != 0
         timeout = 0
         key_data = hkp.get_key(key_id)
         # If we find no match, insert an entry to show that we tried.
         if len(key_data) == 0:
+            print "0x%08X: fetch failed" % key_id
             key_data.append(hkp.key_info(key_id, None))
         tasks = {}
         for k in key_data:
+            print "0x%08X: retrieved" % key_id
             for t in pathdb.insert_key_update_tasks(k, task):
                 tasks[t] = None
         for t in tasks.keys():
