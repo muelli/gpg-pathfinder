@@ -28,15 +28,27 @@ def find_path(target, trusted):
         pending.remove(long(keyfetcher.recv(64), 16))
 
     target_dist = 0
-    trusted_dist = 0
+    trust_dist = 0
+    limit = 10
+    trusted_extensible = 1
     pathdb.initial_setup(task, target, trusted)
     while 1:
-        path = pathdb.best_match_found(task, target_dist, trusted_dist)
+        path = pathdb.best_match_found(task, target_dist, trust_dist)
         if path != None:
             return path
+
+        if trust_dist < target_dist and trust_dist < limit/2 \
+           and trusted_extensible:
+            new_entries = pathdb.extend_trust(task, trust_dist)
+            if new_entries == 0:
+                trusted_extensible = 0
+            else:
+                trust_dist += 1
+                continue
+
         new_entries = pathdb.extend_target(task, target_dist)
         if new_entries == 0:
-            return None
+            break
         target_dist += 1
 
 
