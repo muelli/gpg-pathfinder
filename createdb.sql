@@ -11,7 +11,7 @@ use pgppathfinder;
 # We use the 32-bit key ID, even though it is not guaranteed to be
 # unique.  This may cause us to report false paths.  Big deal.  The
 # end user *must* check the signatures to get any security, and the
-# false path will be detected than.
+# false path will be detected then.
 #
 # We don't care about which uid a signator signed.  If he has signed
 # any uid, the signature is good for all of them, as far as we are
