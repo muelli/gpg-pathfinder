@@ -1,5 +1,15 @@
 2002-10-13  Per Cederqvist  <ceder@ceder.dyndns.org>
 
+	* README: More text added.
+
+	Fixed a broken progress message.
+	* pathdb.py (insert_sigs_of_key): Print the correct key when
+	printing a scheduling message.
+
+	Improve stability.
+	* hkp.py (get_key): Retry a few times if we get an error from
+	urlopen.  The net is flaky these days.
+
 	Port to current version of MySQLdb.
 	* pathdb.py (init): The current version of MySQLdb comes with a
 	good default set of type conversion functions, so don't provide
