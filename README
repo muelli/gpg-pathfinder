@@ -45,6 +45,16 @@ Replace it with the key ID of your own key.
 
 Edit gpgpathconfig.py.
 
+You might want to populate your cache with some initial data.
+
+    $ wget http://www.lysator.liu.se/~ceder/backup.out.gz
+    $ gunzip backup.out.gz
+    $ make restore
+
+The above commands will load some 18000 keys into the cache.  The keys
+were fetched 2002-10-13.  This will reduce the load on the keyservers,
+and that is probably a good idea.
+
 Using it
 --------
 
