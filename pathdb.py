@@ -119,6 +119,7 @@ def need_key(task, key_id, distance):
     if count == 0:
         # print "Inserting needed key 0x%08X task=%d dist=%d" % (
         #     key_id, task, distance)
+        assert key_id != 0
         cursor.execute('insert into keys_needed (taskno, key_id, distance)'
                        ' values (%s, %s, %s)',
                        (task, key_id, distance))
@@ -301,6 +302,8 @@ def request_keys(task, distance_limit):
     res = len(rows)
     while len(rows) > 0:
         # print "Found:", len(rows)
+        for r in rows[:100]:
+            assert r[1] != 0
         cursor.executemany('insert into keys_needed (taskno, key_id, distance)'
                            ' values (%s, %s, %s)',
                            rows[:100])
