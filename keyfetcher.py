@@ -37,7 +37,7 @@ def toploop(listenfd):
         (key_id, task) = pathdb.key_to_fetch()
         if key_id == None:
             if timeout == 0:
-                timeout = 0.5
+                timeout = 0.05
             else:
                 timeout *= 2
                 if timeout > 30:
