@@ -1,3 +1,28 @@
+2001-01-09  Per Cederqvist  <ceder@moria>
+
+	A first, crude version of the search algorithm, that only works on
+	keys already present in the database.
+	* sqltypes.sed: Define "keytype" as an alias for uint32.
+	* pathdb.py (type_conv): New constant.  We need to convert LONG as
+	long, not int, since we store the key id:s as unsigned values.
+	(init): Pass a conv argument to connect.
+	(_insert_key): Handle unsigned keys, and keys with no uids,
+	properly.  This is needed to handle nonexisting keys.
+	(initial_setup): New function.
+	(best_match_found): New function.
+	(extend_target): New function.
+	* keyfetcher.py (toploop): Some debugging removed.  Report each
+	key fetch, and failure to fetch a key.
+	* findpath.py (find_path): This now basically works, but only if
+	all keys are already present in the database.  Vast heuristical
+	improvements on the algorithm are possible.
+	(print_path): New function.
+	* createdb.sql: Use "keytype" as the type for key ids.  They
+	should be uint32, never uint64.  Use uint32 instead of uint64 for
+	several fields.
+	(task_trusted.distance): Added an index on this field.
+	(task_target.distance): Added an index on this field.
+
 2001-01-07  Per Cederqvist  <ceder@moria>
 
 	Use the database to figure out what keys to fetch.
