@@ -121,6 +121,23 @@ original path:
 Running this command required 14220 additional key fetches and took
 five hours.  Re-running the query took 0.8 seconds.
 
+Obtaining GPG-Pathfinder
+------------------------
+
+Anonymous CVS access:
+
+    $ cvs -d :pserver:anonymous@cvs.lysator.liu.se:/cvsroot/gpg-pathfinder \
+	co gpg-pathfinder
+
+Read/write CVS access:
+
+    $ CVS_RSH=ssh
+    $ export CVS_RSH
+    $ cvs -d :ext:cvs.lysator.liu.se:/cvsroot/gpg-pathfinder co gpg-pathfinder
+
+Contact <ceder@lysator.liu.se> to get read/write access.  Anonymous
+access is open to everybody.
+
 TODO
 ----
 
@@ -142,3 +159,9 @@ Things that should be done:
 
 This is not a high-priority project of mine.  I'd gladly welcome a
 helping hand or two.
+
+Bugs
+----
+
+Bugs can be reported using the Bugzilla installation at
+http://bugzilla.lysator.liu.se/index.cgi
