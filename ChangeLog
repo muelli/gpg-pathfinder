@@ -1,5 +1,11 @@
 2003-02-23  Per Cederqvist  <ceder@ceder.dyndns.org>
 
+	Don't accept signatures made by key 0x00000000, as they break the
+	algorithm.
+	* hkp.py (key_info.add_sig): There is apparently a key signed by
+	key 0x00000000.  I don't believe that's a real signature, so
+	ignore it.
+
 	Attempt to track down a bug where pathdb.key_to_fetch returns key
 	id 0.
 	* pathdb.py (need_key): Assertion added.
