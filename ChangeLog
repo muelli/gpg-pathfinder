@@ -4,6 +4,7 @@
 	* README: Renamed project to GPG-Pathfinder.  Added a plea for
 	help.  Mention CVS access and Bugzilla.
 	Mention http://www.lysator.liu.se/~ceder/backup.out.gz.
+	GPL.
 
 	Renamed project.
 	* findpath.py: Use gpgpathconfig.

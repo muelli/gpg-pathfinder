@@ -11,6 +11,10 @@ at a time from a keyserver.  I don't know if they can keep up with
 that load.  If you use this too much, you might find yourself being
 blocked from the sites.
 
+The source code is released under the GNU General Public License,
+either version 2 of the License, or (at your option) any later
+version.
+
 Architecture
 ------------
 
