@@ -114,7 +114,7 @@ def search(data = None):
         if len(keys) == 0:
             desc = "not found"
         elif len(keys) == 1:
-            desc = keys[0].uid
+            desc = keys[0].uid.encode("latin-1", "replace")
         else:
             desc = "Multiple matches"
         win.add_key("%08X" % key, desc)

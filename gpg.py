@@ -12,7 +12,7 @@ def run_gpg(args):
     return output
 
 def decode_uid(s):
-    # s = unicode(s, "utf-8")
+    s = unicode(s, 'utf-8')
     parts = s.split("\\")
     uid = parts[0]
     for p in parts[1:]:
@@ -46,7 +46,11 @@ def get_keys(id):
          exp, lid, otrust, uid, cls] = flds[:11]
         uid = decode_uid(uid)
         if typ == "pub":
-            print "Public key for %s found" % uid
+            try:
+                name = uid.encode("latin-1")
+            except UnicodeError:
+                name = "??"
+            print "Public key for %s found" % name
             key = Key(long(id, 16), uid)
             keys.append(key)
         else:
@@ -58,4 +62,4 @@ def recv_key(id):
     run_gpg(["--recv-keys", id])
 
 if __name__ == '__main__':
-    print get_keys("FE53DD9")
+    print get_keys("EB144031")

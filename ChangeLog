@@ -1,3 +1,8 @@
+2002-10-20  David Kågedal  <david@kagedal.org>
+
+	* gpg.py: Unicode fixes
+	* pathui.py: Unicode fixes
+
 2002-10-19  David Kågedal  <davidk@lysator.liu.se>
 
 	* gpg.py: New file that provides an interface to running gpg to
