@@ -1,8 +1,10 @@
 2002-10-14  Per Cederqvist  <ceder@ceder.dyndns.org>
 
-	Renamed project.
+	Added bug reporting and CVS access.
 	* README: Renamed project to GPG-Pathfinder.  Added a plea for
-	help.
+	help.  Mention CVS access and Bugzilla.
+
+	Renamed project.
 	* findpath.py: Use gpgpathconfig.
 	* createdb.sql: Rename database to gpgpathfinder.
 	* pathdb.py: Use gpgpathconfig.
