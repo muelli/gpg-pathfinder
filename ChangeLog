@@ -1,3 +1,16 @@
+2001-01-11  Per Cederqvist  <ceder@moria>
+
+	Fetch keys from a keyserver when a search forces us to do so.
+	The returned keys are not correctly handled yet, but it should now
+	be possible to repeat the search again and again, to search among
+	more and more keys.
+	* findpath.py (fetched_key): New function.
+	(find_path): Use it.  Fetch needed keys from keyserver.
+	* pathdb.py (extend_target): Closed a cursor leak.
+	(extend_trust): Likewise.
+	(request_keys): New function.
+	(insert_sigs_of_key): New function, not yet implemented.
+
 2001-01-10  Per Cederqvist  <ceder@moria>
 
 	Prune the search tree by searching from both the front and back.
