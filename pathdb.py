@@ -221,8 +221,10 @@ def backtrack(taskno, best_target, target_dist,
 
 def extend_target(task, target_dist):
     cursor= _DB.cursor()
-    # print "Extending", task, "old distance", target_dist
-    cursor.execute('select %s, sig.key_id, sig.signed_by, %s'
+    cursor.execute('insert into task_target_tmp'
+                   ' (taskno, key_id, signed_by, distance)'
+                   
+                   ' select %s, sig.key_id, sig.signed_by, %s'
                    ' from key_sigs sig, task_target target'
 
                    ' left join task_target old_target'
@@ -239,21 +241,27 @@ def extend_target(task, target_dist):
                    ' and target.taskno = %s'
                    ' and target.distance = %s',
                    (task, target_dist + 1, task, target_dist))
-    rows = cursor.fetchall()
-    cursor.executemany('insert into task_target'
-                       ' (taskno, key_id, signed_by, distance)'
-                       ' values'
-                       ' (%s, %s, %s, %s)',
-                       rows)
+    cursor.execute('insert into task_target'
+                   ' (taskno, key_id, signed_by, distance)'
+                   ' select taskno, key_id, signed_by, distance'
+                   ' from task_target_tmp'
+                   ' where taskno = %s',
+                   (task,))
+    res = cursor.rowcount
+    cursor.execute('delete from task_target_tmp'
+                   ' where taskno = %s',
+                   (task,))
     cursor.close()
     _DB.commit()
-    return len(rows)
+    return res
 
 
 def extend_trust(task, trust_dist):
     cursor = _DB.cursor()
-    # print "Ext trust", task, "old distance", trust_dist
-    cursor.execute('select %s, sig.key_id, sig.signed_by, %s'
+    cursor.execute('insert into task_trusted_tmp'
+                   ' (taskno, key_id, signed_by, distance)'
+
+                   ' select %s, sig.key_id, sig.signed_by, %s'
                    ' from key_sigs sig, task_trusted trust'
 
                    ' left join task_trusted old_trust'
@@ -270,16 +278,19 @@ def extend_trust(task, trust_dist):
                    ' and trust.taskno = %s'
                    ' and trust.distance = %s',
                    (task, trust_dist + 1, task, trust_dist))
-    rows = cursor.fetchall()
-    cursor.executemany('insert into task_trusted'
-                       ' (taskno, key_id, signed_by, distance)'
-                       ' values'
-                       ' (%s, %s, %s, %s)',
-                       rows)
-    # print "Ext trust... done."
+    cursor.execute('insert into task_trusted'
+                   ' (taskno, key_id, signed_by, distance)'
+                   ' select taskno, key_id, signed_by, distance'
+                   ' from task_trusted_tmp'
+                   ' where taskno = %s',
+                   (task,))
+    res = cursor.rowcount
+    cursor.execute('delete from task_trusted_tmp'
+                   ' where taskno = %s',
+                   (task,))
     cursor.close()
     _DB.commit()
-    return len(rows)
+    return res
 
 def request_keys(task, distance_limit):
     cursor = _DB.cursor()
@@ -295,18 +306,17 @@ def request_keys(task, distance_limit):
                    ' and task_target.distance < %s',
                    (task, task, distance_limit - 1))
     rows = cursor.fetchall()
-    if len(rows) > 0:
+    res = len(rows)
+    while len(rows) > 0:
         # print "Found:", len(rows)
         cursor.executemany('insert into keys_needed (taskno, key_id, distance)'
                            ' values (%s, %s, %s)',
-                           rows)
-    else:
-        # print "None found"
-        pass
+                           rows[:100])
+        rows = rows[100:]
     cursor.execute('unlock tables')
     cursor.close()
     _DB.commit()
-    return len(rows)
+    return res
 
 def insert_sigs_of_key(task, key_id, limit):
     reader = _DB.cursor()
@@ -331,7 +341,7 @@ def insert_sigs_of_key(task, key_id, limit):
                     ' where signed_by = %s'
                     ' and taskno = %s'
                     ' and distance <= %s',
-                    (row[2], task, row[3] - 1))
+                    (row[2], task, row[3]))
         sel_row = sel.fetchone()
         if sel_row[0] > 0:
             # print "Extending With 0x%08X 0x%08X -- not!" % (row[1], row[2])
