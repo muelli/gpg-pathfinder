@@ -54,7 +54,7 @@ def insert_key_update_tasks(k, task):
     schedule = cursor.fetchone()[0]
     cursor.execute('update tasks set fetched = fetched + 1, schedule = %s'
                    ' where taskno = %s',
-                   (task, schedule + 1))
+                   (schedule + 1, task))
     cursor.close()
     _DB.commit()
     return map(lambda(row): row[0], tasks)
@@ -113,6 +113,11 @@ def create_task(target, trusted):
     return task
 
 def need_key(task, key_id, distance):
+    """Enqueue a request for a key.
+    Returns true if the key is already present.
+    Inserts a request for the key and returns false if the key is missing.
+    """
+
     assert key_id > 0
     cursor = _DB.cursor()
     cursor.execute('lock tables keys_needed write, key_info read')
@@ -156,53 +161,60 @@ def best_match_found(taskno, target_dist, trust_dist):
                    ' limit 1',
                    (taskno, taskno, target_dist, trust_dist))
     row = cursor.fetchone()
+    cursor.close()
+    _DB.commit()
     if row == None:
         result = None
     else:
-        # We have found a match!  Now, backtrack.
+        return backtrack(taskno, row[0], target_dist,
+                         row[1], row[2], trust_dist)
+
+def backtrack(taskno, best_target, target_dist,
+              middle, best_trust, trust_dist):
+    # We have found a match!  Now, backtrack.
+
+    result = [best_target, middle, best_trust]
+
+    # print "Match found.  Middle: 0x%08X 0x%08X 0x%08X" % tuple(result)
+
+    if target_dist == 0:
+        assert best_target == 0
+        del result[0]
+        best_target = middle
+        # print "(left removed)"
+    if trust_dist == 0:
+        assert best_trust == 0
+        del result[-1]
+        best_trust = middle
+        # print "(right removed)"
+
+    cursor = _DB.cursor()
+
+    while target_dist > 1:
+        cursor.execute('select key_id from task_target'
+                       ' where signed_by = %s and distance = %s'
+                       ' and taskno = %s'
+                       ' limit 1',
+                       (best_target, target_dist - 1, taskno))
+        row = cursor.fetchone()
+        assert row != None
         best_target = row[0]
-        middle = row[1]
-        best_trust = row[2]
-        result = [best_target, middle, best_trust]
+        result.insert(0, best_target)
+        target_dist -= 1
+        # print "(left added: 0x%08X)" % best_target
 
-        # print "Match found.  Middle: 0x%08X 0x%08X 0x%08X" % tuple(result)
-
-        if target_dist == 0:
-            assert best_target == 0
-            del result[0]
-            best_target = middle
-            # print "(left removed)"
-        if trust_dist == 0:
-            assert best_trust == 0
-            del result[-1]
-            best_trust = middle
-            # print "(right removed)"
-
-        while target_dist > 1:
-            cursor.execute('select key_id from task_target'
-                           ' where signed_by = %s and distance = %s'
-                           ' and taskno = %s'
-                           ' limit 1',
-                           (best_target, target_dist - 1, taskno))
-            row = cursor.fetchone()
-            assert row != None
-            best_target = row[0]
-            result.insert(0, best_target)
-            target_dist -= 1
-            # print "(left added: 0x%08X)" % best_target
-
-        while trust_dist > 1:
-            cursor.execute('select signed_by from task_trusted'
-                           ' where key_id = %s and distance = %s'
-                           ' and taskno = %s'
-                           ' limit 1',
-                           (best_trust, trust_dist - 1, taskno))
-            row = cursor.fetchone()
-            assert row != None
-            best_trust = row[0]
-            result.append(best_trust)
-            trust_dist -= 1
-            # print "(right added: 0x%08X)" % best_trust
+    while trust_dist > 1:
+        cursor.execute('select signed_by from task_trusted'
+                       ' where key_id = %s and distance = %s'
+                       ' and taskno = %s'
+                       ' limit 1',
+                       (best_trust, trust_dist - 1, taskno))
+        row = cursor.fetchone()
+        assert row != None
+        best_trust = row[0]
+        result.append(best_trust)
+        trust_dist -= 1
+        # print "(right added: 0x%08X)" % best_trust
     cursor.close()
     _DB.commit()
     return result
@@ -327,18 +339,94 @@ def request_keys(task, distance_limit):
     return len(rows)
 
 def insert_sigs_of_key(task, key_id, limit):
-    print "Simulating that 0x%08X has no sigs" % key_id
-    # Insert signatures into task_trusted.
-    # Check for new overlap.
+    reader = _DB.cursor()
+    ins = _DB.cursor()
+    sel = _DB.cursor()
+
     # Insert signatures into task_target.
-    # Check for new overlap.
-    # Find the transitive shell of task_trusted and task_target,
-    # checking for new overlap and inserting keys into
-    # keys_soon_needed as we go.
-    # Extend keys_needed with new keys found not present during
-    # signature insertion into task_target and task_trusted.
-    # Move keys_soon_needed to keys_needed.
-    return (None, 0)
+    reader.execute('select t.taskno, s.key_id, s.signed_by, t.distance + 1'
+                   ' from key_sigs s, task_target t'
+                   ' where s.key_id = t.signed_by'
+                   ' and t.taskno = %s'
+                   ' and s.key_id = %s'
+                   ' and t.distance < %s',
+                   (task, key_id, limit))
+    new_requests = 0
+    any_inserted = 0
+    while 1:
+        row = reader.fetchone()
+        if row == None:
+            break
+        sel.execute('select count(*) from task_target'
+                    ' where signed_by = %s'
+                    ' and taskno = %s'
+                    ' and distance <= %s',
+                    (row[2], task, row[3] - 1))
+        sel_row = sel.fetchone()
+        if sel_row[0] > 0:
+            # print "Extending With 0x%08X 0x%08X -- not!" % (row[1], row[2])
+            continue
+        sel.execute('select count(*) from task_forbidden'
+                    ' where key_id = %s and taskno = %s',
+                    (row[2], task))
+        sel_row = sel.fetchone()
+        if sel_row[0] > 0:
+            # print "Extending With 0x%08X 0x%08X -- bad!" % (row[1], row[2])
+            continue
+        any_inserted = 1
+        # print "Extending With 0x%08X 0x%08X" % (row[1], row[2])
+        ins.execute('insert into task_target'
+                    ' (taskno, key_id, signed_by, distance)'
+                    ' values'
+                    ' (%s, %s, %s, %s)',
+                    row)
+        if row[3] < limit:
+            if need_key(task, row[2], row[3]):
+                print "Scheduling check of 0x%08X" % key_id
+                ins.execute('insert into task_unchecked'
+                            ' (taskno, key_id, distance)'
+                            ' values'
+                            ' (%s, %s, %s)',
+                            (task, row[2], row[3]))
+            else:
+                new_requests += 1
+
+    if any_inserted:
+        # Check for new overlap.
+        sel.execute('select target.key_id, target.signed_by,'
+                    ' trusted.signed_by,'
+                    ' target.distance, trusted.distance'
+                    ' from task_target target, task_trusted trusted'
+                    ' where target.signed_by = trusted.key_id'
+                    ' and target.taskno = %s'
+                    ' and trusted.taskno = %s'
+                    ' and trusted.key_id = %s'
+                    ' order by target.distance+trusted.distance'
+                    ' limit 1',
+                   (task, task, key_id))
+        row = sel.fetchone()
+        if row != None:
+            reader.close()
+            sel.close()
+            ins.close()
+            _DB.commit()
+            return (backtrack(task, row[0], row[3], row[1], row[2], row[4]),
+                    new_requests)
+
+    # FIXME:Insert signatures into task_trusted, similarly to the above code.
+    # FIXME:...and then check for new overlap, again.
+
+    # print "Deleting from task_uncheckd(%d, 0x%08X)" % (task, key_id)
+    ins.execute('delete from task_unchecked'
+                ' where taskno = %s'
+                ' and key_id = %s',
+                (task, key_id))
+    ins.close()
+    sel.close()
+    reader.close()
+    _DB.commit()
+
+    return (None, new_requests)
 
 def task_forbidden_keys(task, forbidden_keys):
     # print "FORBIDDING", task, forbidden_keys
@@ -349,3 +437,16 @@ def task_forbidden_keys(task, forbidden_keys):
                            zip(forbidden_keys))
         cursor.close()
         _DB.commit()
+
+def unchecked_key(task):
+    sel = _DB.cursor()
+    sel.execute('select key_id from task_unchecked'
+                ' where taskno = %s'
+                ' order by distance'
+                ' limit 1',
+                (task, ))
+    res = sel.fetchone()
+    if res == None:
+        return None
+    else:
+        return res[0]
