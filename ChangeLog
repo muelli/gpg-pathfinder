@@ -1,0 +1,14 @@
+2001-01-06  Per Cederqvist  <ceder@moria>
+
+	Start the project.
+	* AUTHORS: New file.
+	* Makefile.am: New file.
+	* NEWS: New file.
+	* README: New file.
+	* THANKS: New file.
+	* TODO: New file.
+	* bootstrap.sh: New file.
+	* configure.in: New file.
+	* createdb.sql: New file.
+	* mkrel.sh: New file.
+	* sqltypes.sed: New file.
