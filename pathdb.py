@@ -227,7 +227,18 @@ def extend_target(task, target_dist):
     # print "Extending", task, "old distance", target_dist
     reader.execute('select sig.key_id, sig.signed_by'
                    ' from key_sigs sig, task_target target'
+
+                   ' left join task_target old_target'
+                   ' on sig.signed_by = old_target.signed_by'
+                   ' and target.taskno = old_target.taskno'
+
+                   ' left join task_forbidden forbidden'
+                   ' on sig.signed_by = forbidden.key_id'
+                   ' and target.taskno = forbidden.taskno'
+
                    ' where sig.key_id = target.signed_by'
+                   ' and old_target.taskno is null'
+                   ' and forbidden.taskno is null'
                    ' and target.taskno = %s'
                    ' and target.distance = %s',
                    (task, target_dist))
@@ -236,20 +247,6 @@ def extend_target(task, target_dist):
         row = reader.fetchone()
         if row == None:
             break
-        sel.execute('select count(*) from task_target'
-                    ' where signed_by = %s and taskno = %s',
-                    (row[1], task))
-        sel_row = sel.fetchone()
-        if sel_row[0] > 0:
-            # print "Extending With 0x%08X 0x%08X -- not!" % (row[0], row[1])
-            continue
-        sel.execute('select count(*) from task_forbidden'
-                    ' where key_id = %s and taskno = %s',
-                    (row[1], task))
-        sel_row = sel.fetchone()
-        if sel_row[0] > 0:
-            # print "Extending With 0x%08X 0x%08X -- bad!" % (row[0], row[1])
-            continue
         count += 1
         # print "Extending With 0x%08X 0x%08X" % (row[0], row[1])
         ins.execute('insert into task_target'
