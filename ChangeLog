@@ -1,3 +1,38 @@
+2001-01-27  Per Cederqvist  <ceder@moria>
+
+	More speedup.
+	* createdb.sql (keys_needed): Tweak the index.
+
+2001-01-21  Per Cederqvist  <ceder@moria>
+
+	More speedup.
+	* pathdb.py (extend_target): Use "insert into ... select" to speed
+	up things.
+	(extend_trust): Likewise.
+	(request_keys): Ask for keys in smaller chunks, to avoid database
+	limits.
+	(insert_sigs_of_key): Fixed a fence post error.
+	* createdb.sql (task_trusted): Optimize indexes.
+	(task_trusted_tmp): New table.
+	(task_target): Optimize indexes.
+	(task_target_tmp): New table.
+
+	Create make target to run "optimize table", and to backup and
+	restore all keys.
+	* optimize.sql: New file.
+	* Makefile.am (optimize_db): New target.
+	(backup): New target.
+	(restore): New target.
+
+2001-01-18  Per Cederqvist  <ceder@moria>
+
+	More speedup.
+	* pathdb.py (extend_target): Use a single executemany when
+	inserting new keys.
+	(extend_trust): Optimize for speed by using left joins instead of
+	several 'select count(*)', and using executemany instead of
+	execute.
+
 2001-01-17  Per Cederqvist  <ceder@moria>
 
 	Increase speed by a factor of 2.
