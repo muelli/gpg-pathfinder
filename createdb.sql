@@ -124,5 +124,5 @@ create table keys_needed (
 	key_id		keytype		not null,
 	distance	uint8		not null,
 
-	INDEX(taskno, distance)
+	UNIQUE INDEX(taskno, distance, key_id)
 );
