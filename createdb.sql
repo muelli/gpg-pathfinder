@@ -18,7 +18,7 @@ use pgppathfinder;
 # concerned.
 
 create table key_info (
-	key_id		uint32		not null,
+	key_id		keytype		not null,
 
 	# We store NULL in the fields below if we know for sure that
 	# the key servers don't know anything about this key.
@@ -34,15 +34,15 @@ create table key_info (
 );
 
 create table key_uids (
-	key_id		uint32		not null,
+	key_id		keytype		not null,
 	name		varchar(255),
 
 	INDEX(key_id)
 );
 
 create table key_sigs (
-	key_id		uint32		not null,
-	signed_by	uint32		not null, # May refer to a key
+	key_id		keytype		not null,
+	signed_by	keytype		not null, # May refer to a key
 						  # we know nothing about yet.
 
 	INDEX(key_id),
@@ -51,16 +51,16 @@ create table key_sigs (
 
 # Our work queue.
 create table tasks (
-	taskno		uint64 		auto_increment not null,
-	target		uint64		not null,
-	trusted		uint64		not null,
+	taskno		uint32 		auto_increment not null,
+	target		keytype		not null,
+	trusted		keytype		not null,
 	fetched		uint32		not null,
 	created		datetime	not null,
 	finished	datetime	null,
 	lastused	datetime	null,
 	pathfound	bool		null,
 	active		bool		not null,
-	schedule	uint64		not null,
+	schedule	uint32		not null,
 
 	INDEX(taskno),
 	INDEX(target, trusted),
@@ -69,30 +69,32 @@ create table tasks (
 );
 
 create table task_trusted (
-	taskno		uint64		not null,
-	key_id		uint64		not null,
-	signed_by	uint64		not null,
+	taskno		uint32		not null,
+	key_id		keytype		not null,
+	signed_by	keytype		not null,
 	distance	uint8		not null,
 
 	INDEX(taskno),
 	INDEX(key_id),
-	INDEX(signed_by)
+	INDEX(signed_by),
+	INDEX(distance)
 );
 
 create table task_target (
-	taskno		uint64		not null,
-	key_id		uint64		not null,
-	signed_by	uint64		not null,
+	taskno		uint32		not null,
+	key_id		keytype		not null,
+	signed_by	keytype		not null,
 	distance	uint8		not null,
 
 	INDEX(taskno),
 	INDEX(key_id),
-	INDEX(signed_by)
+	INDEX(signed_by),
+	INDEX(distance)
 );
 
 create table keys_needed (
-	taskno		uint64		not null,
-	key_id		uint64		not null,
+	taskno		uint32		not null,
+	key_id		keytype		not null,
 	distance	uint8		not null,
 
 	INDEX(taskno, distance)
