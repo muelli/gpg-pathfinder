@@ -57,7 +57,7 @@ class key_info:
         self.__names.append(name)
 
     def add_sig(self, signer):
-        if signer not in self.__signers:
+        if signer != 0 and signer not in self.__signers:
             self.__signers.append(signer)
 
     def key_id(self):
