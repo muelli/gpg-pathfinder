@@ -6,7 +6,7 @@ import pathdb
 def fetched_key(keyfetcher):
     return long(keyfetcher.recv(10), 16)
 
-def find_path(target, trusted):
+def find_path(target, trusted, forbidden_keys = []):
     assert target > 0
     assert trusted > 0
     task = pathdb.create_task(target, trusted)
@@ -30,13 +30,15 @@ def find_path(target, trusted):
     while len(pending) > 0:
         pending.remove(fetched_key(keyfetcher))
 
+    pathdb.task_forbidden_keys(task, forbidden_keys)
+
     # Can we find a path without fetching a new key?
     target_dist = 0
     trust_dist = 0
     limit = 10
     trusted_extensible = 1
     pathdb.initial_setup(task, target, trusted)
-    while 1:
+    while target_dist < limit:
         path = pathdb.best_match_found(task, target_dist, trust_dist)
         if path != None:
             return path
@@ -64,9 +66,10 @@ def find_path(target, trusted):
         fetched_keys += 1
         pending_keys -= 1
         print "Got 0x%08X" % key_id
-        path = pathdb.insert_sigs_of_key(task, key_id)
+        path, new_keys = pathdb.insert_sigs_of_key(task, key_id, limit)
         if path != None:
             return path
+        pending_keys += new_keys
 
     return None
 
@@ -86,5 +89,12 @@ if __name__ == '__main__':
     print_path(find_path(0xF9036141L, 0xF9036141L))
     print_path(find_path(0x9AA2E311L, 0x94514BBDL))
     print_path(find_path(0x9AA2E311L, 0x57D395E1L))
+    print "Ulla..."
     print_path(find_path(0xED2354B9L, 0x9AA2E311L))
+    print "Horowitz..."
+    print_path(find_path(0x1CF27FD5L, 0x9AA2E311L))
+    print "Trojnara"
+    print_path(find_path(0x74C732D1L, 0x9AA2E311L, [
+    	0xFB5E1519L, 0x4413B691L]))
+    print_path(find_path(0x20B19259L, 0xD294608EL, []))
     print "Done"
