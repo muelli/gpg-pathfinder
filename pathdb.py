@@ -4,7 +4,7 @@ _DB = None
 
 def init():
     global _DB
-    _DB = MySQLdb.connect(db='pgppathfinder')
+    _DB = MySQLdb.connect(db='gpgpathfinder')
 
 def _insert_key(cursor, k):
     cursor.execute('delete from key_info where key_id = %s', (k.key_id(),))

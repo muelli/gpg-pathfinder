@@ -2,7 +2,7 @@ import string
 import select
 import socket
 
-import pgppathconfig
+import gpgpathconfig
 import pathdb
 import hkp
 
@@ -64,7 +64,7 @@ def toploop(listenfd):
 def start():
     listenfd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     listenfd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    listenfd.bind(('localhost', pgppathconfig.keyfetcher_port))
+    listenfd.bind(('localhost', gpgpathconfig.keyfetcher_port))
     listenfd.listen(3)
     pathdb.init()
     pathdb.deactivate_all_tasks()

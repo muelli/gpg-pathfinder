@@ -2,7 +2,7 @@ import htmlentitydefs
 import urllib2
 import re
 
-import pgppathconfig
+import gpgpathconfig
 
 matcher = re.compile('('
                      '(?P<type>pub|uid|sig)'
@@ -79,7 +79,7 @@ def get_key(key_id):
         try:
             f = urllib2.urlopen('http://%s:11371/pks/lookup?op=vindex&'
                                 'search=0x%08X' %
-                                (pgppathconfig.keyserver, key_id))
+                                (gpgpathconfig.keyserver, key_id))
             break
         except urllib2.URLError:
             print "FAIL: retrying..."

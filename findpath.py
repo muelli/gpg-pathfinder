@@ -1,7 +1,7 @@
 import sys
 import socket
 
-import pgppathconfig
+import gpgpathconfig
 import pathdb
 
 def fetched_key(keyfetcher):
@@ -12,7 +12,7 @@ def find_path(target, trusted, forbidden_keys = []):
     assert trusted > 0
     task = pathdb.create_task(target, trusted)
     keyfetcher = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    keyfetcher.connect(('localhost', pgppathconfig.keyfetcher_port))
+    keyfetcher.connect(('localhost', gpgpathconfig.keyfetcher_port))
     line = keyfetcher.recv(64)
     if line != "who-are-you\n":
         print "Bad heading from keyserver:", line
