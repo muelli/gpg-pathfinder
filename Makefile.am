@@ -1,4 +1,4 @@
-#  pgp-pathfinder - Find a path from one PGP key to another
+#  gpg-pathfinder - Find a path from one PGP key to another
 #  Copyright (C) 2001 Per Cederqvist
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -25,11 +25,11 @@ recreate_db: Makefile $(srcdir)/sqltypes.sed $(srcdir)/createdb.sql
 		| $(MYSQL)
 optimize_db: Makefile $(srcdir)/sqltypes.sed $(srcdir)/optimize.sql
 	sed -f $(srcdir)/sqltypes.sed < $(srcdir)/optimize.sql \
-		| $(MYSQL) pgppathfinder
+		| $(MYSQL) gpgpathfinder
 
 backup:
-	mysqldump -e -c -n -t pgppathfinder key_info key_uids key_sigs > $@.tmp
+	mysqldump -e -c -n -t gpgpathfinder key_info key_uids key_sigs > $@.tmp
 	mv $@.tmp $@.out
 
 restore:
-	$(MYSQL) pgppathfinder < backup.out
+	$(MYSQL) gpgpathfinder < backup.out
