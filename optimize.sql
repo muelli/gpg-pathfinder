@@ -1,0 +1,11 @@
+optimize table key_info;
+optimize table key_uids;
+optimize table key_sigs;
+optimize table tasks;
+optimize table task_trusted;
+optimize table task_target;
+optimize table task_trusted_tmp;
+optimize table task_target_tmp;
+optimize table task_unchecked;
+optimize table task_forbidden;
+optimize table keys_needed;
