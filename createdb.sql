@@ -74,10 +74,16 @@ create table task_trusted (
 	signed_by	keytype		not null,
 	distance	uint8		not null,
 
-	INDEX(taskno),
-	INDEX(key_id),
-	INDEX(signed_by),
-	INDEX(distance)
+	UNIQUE INDEX(taskno, key_id, distance)
+);
+
+create table task_trusted_tmp (
+	taskno		uint32		not null,
+	key_id		keytype		not null,
+	signed_by	keytype		not null,
+	distance	uint8		not null,
+
+	INDEX(taskno)
 );
 
 create table task_target (
@@ -86,10 +92,16 @@ create table task_target (
 	signed_by	keytype		not null,
 	distance	uint8		not null,
 
-	INDEX(taskno),
-	INDEX(key_id),
-	INDEX(signed_by),
-	INDEX(distance)
+	UNIQUE INDEX(taskno, signed_by, distance)
+);
+
+create table task_target_tmp (
+	taskno		uint32		not null,
+	key_id		keytype		not null,
+	signed_by	keytype		not null,
+	distance	uint8		not null,
+
+	INDEX(taskno)
 );
 
 create table task_unchecked (
