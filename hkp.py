@@ -2,7 +2,7 @@ import htmlentitydefs
 import urllib2
 import re
 
-KEYSERVER = 'wwwkeys.dk.pgp.net'
+import pgppathconfig
 
 matcher = re.compile('('
                      '(?P<type>pub|uid|sig)'
@@ -75,7 +75,7 @@ class key_info:
 
 def get_key(key_id):
     f = urllib2.urlopen('http://%s:11371/pks/lookup?op=vindex&search=0x%08X' %
-                        (KEYSERVER, key_id))
+                        (pgppathconfig.keyserver, key_id))
     keys = []
 
     for line in f.readlines():
