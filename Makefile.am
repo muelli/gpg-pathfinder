@@ -23,3 +23,13 @@ PYTHON = @PYTHON@
 recreate_db: Makefile $(srcdir)/sqltypes.sed $(srcdir)/createdb.sql
 	sed -f $(srcdir)/sqltypes.sed < $(srcdir)/createdb.sql \
 		| $(MYSQL)
+optimize_db: Makefile $(srcdir)/sqltypes.sed $(srcdir)/optimize.sql
+	sed -f $(srcdir)/sqltypes.sed < $(srcdir)/optimize.sql \
+		| $(MYSQL) pgppathfinder
+
+backup:
+	mysqldump -e -c -n -t pgppathfinder key_info key_uids key_sigs > $@.tmp
+	mv $@.tmp $@.out
+
+restore:
+	$(MYSQL) pgppathfinder < backup.out
