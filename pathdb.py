@@ -233,3 +233,41 @@ def extend_target(task, target_dist):
     ins.close()
     _DB.commit()
     return count
+
+
+def extend_trust(task, trust_dist):
+    reader = _DB.cursor()
+    sel = _DB.cursor()
+    ins = _DB.cursor()
+    count = 0
+    # print "Ext trust", task, "old distance", trust_dist
+    reader.execute('select sig.key_id, sig.signed_by'
+                   ' from key_sigs sig, task_trusted trust'
+                   ' where sig.signed_by = trust.key_id'
+                   ' and trust.taskno = %s'
+                   ' and trust.distance = %s',
+                   (task, trust_dist))
+    trust_dist += 1
+    while 1:
+        row = reader.fetchone()
+        if row == None:
+            break
+        sel.execute('select count(*) from task_trusted'
+                    ' where key_id = %s and taskno = %s',
+                    (row[0], task))
+        sel_row = sel.fetchone()
+        if sel_row[0] > 0:
+            # print "Ext trust with 0x%08X 0x%08X -- not!" % (row[0], row[1])
+            continue
+        count += 1
+        # print "Ext trust with 0x%08X 0x%08X" % (row[0], row[1])
+        ins.execute('insert into task_trusted'
+                    ' (taskno, key_id, signed_by, distance)'
+                    ' values'
+                    ' (%s, %s, %s, %s)',
+                    (task, row[0], row[1], trust_dist))
+    # print "Ext trust... done."
+    reader.close()
+    ins.close()
+    _DB.commit()
+    return count
