@@ -74,8 +74,19 @@ class key_info:
 
 
 def get_key(key_id):
-    f = urllib2.urlopen('http://%s:11371/pks/lookup?op=vindex&search=0x%08X' %
-                        (pgppathconfig.keyserver, key_id))
+    f = None
+    for i in range(5):
+        try:
+            f = urllib2.urlopen('http://%s:11371/pks/lookup?op=vindex&'
+                                'search=0x%08X' %
+                                (pgppathconfig.keyserver, key_id))
+            break
+        except urllib2.URLError:
+            print "FAIL: retrying..."
+
+    if f == None:
+        print "FAILed to fetch 0x%08X" % key_id
+        return []
     keys = []
 
     for line in f.readlines():
