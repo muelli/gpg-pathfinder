@@ -1,8 +1,8 @@
 # Start from scratch.
 
-drop database if exists pgppathfinder;
-create database pgppathfinder;
-use pgppathfinder;
+drop database if exists gpgpathfinder;
+create database gpgpathfinder;
+use gpgpathfinder;
 
 # Persistent information about a key.  When anything is inserted into
 # key_info, the key_uids and key_sigs tables are also updated for the
