@@ -1,5 +1,23 @@
 2001-01-07  Per Cederqvist  <ceder@moria>
 
+	Use the database to figure out what keys to fetch.
+	* findpath.py: New file.  This file is far from ready, but can
+	excercise keyfetcher.py.
+	* keyfetcher.py: New file.  Fetch keys that the database indicates
+	are wanted.
+	* pgppathconfig.py: New file.
+	* pathdb.py (_insert_key): New function.
+	(insert_key): Use _insert_key to simplify code.
+	(insert_key_update_tasks): New function.
+	(activate_task): New function.
+	(deactivate_task): New function.
+	(deactivate_all_tasks): New function.
+	(key_to_fetch): New function.
+	(create_task): New function.
+	(need_key): New function.
+	* hkp.py (KEYSERVER): Moved to pgppathconfig.  All users updated.
+	* createdb.sql (tasks.active, tasks.schedule): New columns.
+
 	Fetch keys and store them into the database.
 	* pathdb.py: New file.  Can enter keys into the database.
 	* hkp.py: New file, that can fetch key info from a keyserver.
