@@ -1,4 +1,5 @@
 s/[ 	][ 	]*/ /g
+s/keytype/uint32/g
 s/bool/tinyint unsigned/g
 s/uint8/tinyint unsigned/g
 s/uint16/smallint unsigned/g
