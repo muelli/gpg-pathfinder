@@ -4,3 +4,117 @@ PGP-Pathfinder
 This is going to be a superb redistributable PGP pathfinder.  The
 project was started 2001-01-06 ceder, when he had spent way too much
 time trying to find a living trace of the old AT&T PathFinder.
+
+Currently, this isn't so good.  It works, but is dreadfully slow.  It
+can take hours to find a path, and all that while it fetches one key
+at a time from a keyserver.  I don't know if they can keep up with
+that load.  If you use this too much, you might find yourself being
+blocked from the sites.
+
+Architecture
+------------
+
+A MySQL database holds a cache of keys that has been fetched from the
+keyservers.  When a path is requested, an attempt is first made to
+find the key in this cache.  If that fails, one key at a time will be
+fetched from a keyserver, inserted into the database, and a new
+attempt to find a path will be made.  (This is done in an incremental
+way, so the attempt to find a new path it is fairly efficient.)
+
+Installation
+------------
+
+First, install MySQL and the Python module MySQLdb.  
+
+If you got this code from the CVS repository, run these commands:
+
+    ./bootstrap.sh
+    ./configure
+    make
+    make recreate_db   # Removes all keys in the database!
+
+The last step creates all MySQL tables used by this system.  It starts
+by dropping the database, so make sure you don't have a database named
+"pgppathfinder" that contains anything useful.
+
+Edit findpath.py.  Near the end, you will find this line:
+
+    trusted = 0xD294608EL
+
+Replace it with the key ID of your own key.
+
+Using it
+--------
+
+First, start the keyfetcher program:
+
+    python keyfetcher.py
+
+This program is responsible for fetching keys from the keyservers
+using the hkp protocol.  The fetched keys are inserted into the
+database.
+
+Let's say you stumble across this key:
+
+pub  1024R/D9513B39 2002-09-17 CERT Coordination Center <cert@cert.org>
+     Key fingerprint = E0 1E DF F5 FC 76 00 32  77 8F 25 F7 B0 2E 2C 27
+
+Can you trust it?  To find out, run
+
+    $ python findpath.py D9513B39
+
+You will notice how the keyfetcher.py will start writing stuff like:
+
+    0x7AAB5D18: retrieved
+    0x7EB06BF1: retrieved
+    0x05DD98AD: fetch failed
+    0x05DD98AD: retrieved
+    0x5279FA4D: retrieved
+
+At the same time, findpath.py will write a line for each fetched key:
+
+    Pending: 328 Fetched: 58 Got 0x3CE4352F
+    Pending: 444 Fetched: 59 Got 0x26A1B9F6
+    Pending: 443 Fetched: 60 Got 0xC4E8FA8D
+    Pending: 443 Fetched: 61 Got 0x319393F4
+
+The number of pending key fetches is all keys that are signed by your
+key or any of the fetched keys (recursively), and that has not yet
+been fetched from a keyserver.  As soon as a path from your key to the
+CERT key is found, the search will stop, so it is not certain that all
+the pending keys will be fetched.
+
+Finding a path from my key to the CERT key from an empty database
+required 4441 key fetches and took approximately 1.5 hours.  At that
+time, there were 7525 more pending keys to fetch.  The last two lines
+of output looked like this:
+
+    Pending: 7525 Fetched: 2511 Processing 0xD294608E
+    0xD9513B39 0x25897E7A 0x57C3430B 0x6B21489A 0xA8F4C2FD 0xD294608E
+
+Re-running the same command with all necessary keys in the cache took
+0.8 seconds on a 600 MHz Athlon.
+
+The last line in the output is the path.  This means that 0xD9513B39
+is signed by 0x25897E7A, which is signed by 0x57C3430B, et c.  You can
+cut-n-paste it to fetch the keys to your keyring:
+
+    $ gpg --recv 0xD9513B39 0xC078F4D2 0x8B4608A1 0x5B0358A2 \
+	0xA8F4C2FD 0xD294608E
+
+Let's say that for some I want a path that isn't using the 0x8B4608A1
+key.  Just append that key to the command line:
+
+    $ python findpath.py D9513B39 8B4608A1
+
+In my test run, this command completed in just 0.5 seconds and no
+additional key fetches were needed.
+
+You can add more keys, to get different paths.  The following commmand
+will give you a path that doesn't use *any* of the keys in the
+original path:
+
+    $ python findpath.py D9513B39 C078F4D2 8B4608A1 5B0358A2 A8F4C2FD
+
+Running this command required 14220 additional key fetches and took
+five hours.  Re-running the query took 0.8 seconds.
