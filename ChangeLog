@@ -1,3 +1,19 @@
+2002-10-14  Per Cederqvist  <ceder@ceder.dyndns.org>
+
+	Renamed project.
+	* README: Renamed project to GPG-Pathfinder.  Added a plea for
+	help.
+	* findpath.py: Use gpgpathconfig.
+	* createdb.sql: Rename database to gpgpathfinder.
+	* pathdb.py: Use gpgpathconfig.
+	* keyfetcher.py: Use gpgpathconfig.
+	* hkp.py: Use gpgpathconfig.
+	* pgppathconfig.py: Renamed to gpgpathconfig.py.
+	* gpgpathconfig.py: New name for former pgppathconfig.py.
+	* configure.in: Renamed to gpg-pathfinder.
+	* Makefile.am: Rename project to gpg-pathfinder.  Rename database
+	to gpgpathfinder.
+
 2002-10-13  Per Cederqvist  <ceder@ceder.dyndns.org>
 
 	* README: More text added.
