@@ -1,3 +1,10 @@
+2001-01-10  Per Cederqvist  <ceder@moria>
+
+	Prune the search tree by searching from both the front and back.
+	* findpath.py (find_path): Extend both the trust and the target
+	sets, in an attempt to prune the search tree.
+	* pathdb.py (extend_trust): New function.
+
 2001-01-09  Per Cederqvist  <ceder@moria>
 
 	A first, crude version of the search algorithm, that only works on
