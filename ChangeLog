@@ -1,3 +1,19 @@
+2001-01-13  Per Cederqvist  <ceder@moria>
+
+	Many bugs fixed.
+	* pathdb.py (best_match_found): Several bugs fixed.
+	(insert_sigs_of_key): New argument: limit.  This is still not
+	implemented.
+	* findpath.py (find_path): Really limit the search.
+
+	The user can now exclude unwanted keys from the result.
+	* pathdb.py (extend_target): Don't allow forbidden keys to be part
+	of the solution.
+	(extend_trust): Likewise.
+	(task_forbidden_keys): New function.
+	* findpath.py (find_path): New optional argument: forbidden_keys.
+	* createdb.sql (task_forbidden): New table.
+
 2001-01-11  Per Cederqvist  <ceder@moria>
 
 	Fetch keys from a keyserver when a search forces us to do so.
