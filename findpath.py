@@ -36,7 +36,7 @@ def find_path(target, trusted, forbidden_keys = []):
     # Can we find a path without fetching a new key?
     target_dist = 0
     trust_dist = 0
-    limit = 10
+    limit = 7
     trusted_extensible = 1
     pathdb.initial_setup(task, target, trusted)
     while target_dist < limit:
@@ -88,8 +88,7 @@ def print_path(path):
             print "0x%08X" % k,
         print
 
-if __name__ == '__main__':
-    pathdb.init()
+def doit():
     print "Starting"
     print_path(find_path(0x12345678L, 0x12345678L))
     print_path(find_path(0xF9036141L, 0xF9036141L))
@@ -102,4 +101,32 @@ if __name__ == '__main__':
     print "Trojnara"
     print_path(find_path(0x74C732D1L, 0x9AA2E311L, [0xFB5E1519L, 0x4413B691L]))
     print_path(find_path(0x20B19259L, 0xD294608EL, []))
-    print "Done"
+
+def foo():
+    print_path(find_path(0x517D0F0EL, 0xD294608EL,
+                         [#0x2A960705L, 0x3040F125L, 0xA7360529L,
+        #0x2BCBC621L, 0x1E1A8782L
+        ]))
+
+def kent():
+    print_path(find_path(0xF9036141L, 0xD294608EL))
+
+def tege():
+    #print_path(find_path(0x16B7193DL, 0xD294608EL, [0x001B3BA1L, 0xF9036141L, 0x9AA2E311L, 0xF081195DL, 0x8E0A49D1L, 0xC7BBBADEL, 0xC84446C5L]))
+    print_path(find_path(0x16B7193DL, 0xD294608EL, [0x9AA2E311L, 0xC84446C5L]))
+
+def tegeinv():
+    print_path(find_path(0xD294608EL, 0x16B7193DL))
+
+def cert():
+    print_path(find_path(0xD02361C9L, 0xD294608EL, [0x93ED2CCFL, 0xA79FDB0FL, 0x4413B691L, 0xD5C7B5D9L]))
+
+if __name__ == '__main__':
+    pathdb.init()
+    trusted = 0xD294608EL
+    target = long(sys.argv[1], 16)
+    forbidden = []
+    for f in sys.argv[2:]:
+        forbidden.append(long(f, 16))
+    print_path(find_path(target, trusted, forbidden))
+    
