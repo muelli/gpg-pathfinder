@@ -2,17 +2,9 @@ import MySQLdb
 
 _DB = None
 
-type_conv = { MySQLdb.FIELD_TYPE.TINY: int,
-              MySQLdb.FIELD_TYPE.SHORT: int,
-              MySQLdb.FIELD_TYPE.LONG: long,
-              MySQLdb.FIELD_TYPE.FLOAT: float,
-              MySQLdb.FIELD_TYPE.DOUBLE: float,
-              MySQLdb.FIELD_TYPE.LONGLONG: long,
-              MySQLdb.FIELD_TYPE.INT24: int,
-              MySQLdb.FIELD_TYPE.YEAR: int }
 def init():
     global _DB
-    _DB = MySQLdb.connect(db='pgppathfinder', conv=type_conv)
+    _DB = MySQLdb.connect(db='pgppathfinder')
 
 def _insert_key(cursor, k):
     cursor.execute('delete from key_info where key_id = %s', (k.key_id(),))
