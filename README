@@ -1,7 +1,7 @@
-PGP-Pathfinder
+GPG-Pathfinder
 ==============
 
-This is going to be a superb redistributable PGP pathfinder.  The
+This is going to be a superb redistributable PGP/GPG pathfinder.  The
 project was started 2001-01-06 ceder, when he had spent way too much
 time trying to find a living trace of the old AT&T PathFinder.
 
@@ -35,13 +35,15 @@ If you got this code from the CVS repository, run these commands:
 
 The last step creates all MySQL tables used by this system.  It starts
 by dropping the database, so make sure you don't have a database named
-"pgppathfinder" that contains anything useful.
+"gpgpathfinder" that contains anything useful.
 
 Edit findpath.py.  Near the end, you will find this line:
 
     trusted = 0xD294608EL
 
 Replace it with the key ID of your own key.
+
+Edit gpgpathconfig.py.
 
 Using it
 --------
@@ -118,3 +120,25 @@ original path:
 
 Running this command required 14220 additional key fetches and took
 five hours.  Re-running the query took 0.8 seconds.
+
+TODO
+----
+
+Things that should be done:
+
+ - a better way of synchronize the key database with key servers
+
+ - a web frontend
+
+ - integrate sigmesh
+
+ - check the signatures (using gpg) in the returned path; remove
+   broken signatures from the database
+
+ - re-fetch old keys where we might have old data
+
+ - run multiple keyfetcher processes, maybe even to multiple key
+   servers to reduce the load we impose on them
+
+This is not a high-priority project of mine.  I'd gladly welcome a
+helping hand or two.
