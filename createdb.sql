@@ -92,6 +92,14 @@ create table task_target (
 	INDEX(distance)
 );
 
+create table task_unchecked (
+	taskno		uint32		not null,
+	key_id		keytype		not null,
+	distance	uint8		not null,
+
+	UNIQUE INDEX(taskno, distance, key_id)
+);
+
 create table task_forbidden (
 	taskno		uint32		not null,
 	key_id		keytype		not null,
