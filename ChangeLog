@@ -1,3 +1,17 @@
+2002-10-13  Per Cederqvist  <ceder@ceder.dyndns.org>
+
+	Port to current version of MySQLdb.
+	* pathdb.py (init): The current version of MySQLdb comes with a
+	good default set of type conversion functions, so don't provide
+	our own.
+
+	Performance tweaks.
+	* keyfetcher.py (toploop): Lower the initial timeout to 0.05.
+	* findpath.py (find_path): Lower the limit to 7.
+
+	Spelling error.
+	* createdb.sql: Fixed a spelling error in a comment.
+
 2001-01-27  Per Cederqvist  <ceder@moria>
 
 	More speedup.
