@@ -59,9 +59,13 @@ create table tasks (
 	finished	datetime	null,
 	lastused	datetime	null,
 	pathfound	bool		null,
+	active		bool		not null,
+	schedule	uint64		not null,
 
 	INDEX(taskno),
-	INDEX(target, trusted)
+	INDEX(target, trusted),
+	INDEX(active),
+	INDEX(schedule)
 );
 
 create table task_trusted (
