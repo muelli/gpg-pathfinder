@@ -1,3 +1,16 @@
+2001-01-14  Per Cederqvist  <ceder@moria>
+
+	Handle returned keys.  This basically works, but is way to slow.
+	* pathdb.py (insert_key_update_tasks): Don't swap task and
+	schedule.
+	(best_match_found): Use backtrack() to simplify code.
+	(backtrack): New function, extracted from best_match_found.
+	(insert_sigs_of_key): Implemented most of this function.  It
+	doesn't extend the trusted domain, however.
+	(unchecked_key): New function.
+	* findpath.py (find_path): Fetch keys from task_unchecked.
+	* createdb.sql (task_unchecked): New table.
+
 2001-01-13  Per Cederqvist  <ceder@moria>
 
 	Many bugs fixed.
