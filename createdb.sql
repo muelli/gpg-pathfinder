@@ -92,6 +92,13 @@ create table task_target (
 	INDEX(distance)
 );
 
+create table task_forbidden (
+	taskno		uint32		not null,
+	key_id		keytype		not null,
+
+	INDEX(taskno, key_id)
+);
+
 create table keys_needed (
 	taskno		uint32		not null,
 	key_id		keytype		not null,
