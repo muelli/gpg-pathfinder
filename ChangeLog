@@ -1,3 +1,12 @@
+2001-01-07  Per Cederqvist  <ceder@moria>
+
+	Fetch keys and store them into the database.
+	* pathdb.py: New file.  Can enter keys into the database.
+	* hkp.py: New file, that can fetch key info from a keyserver.
+	* createdb.sql (key_info.key_type): Column removed.
+	(tasks.finished, tasks.lastused, tasks.pathfound): New columns.
+	(task_trusted, task_target, keys_needed): New tables.
+
 2001-01-06  Per Cederqvist  <ceder@moria>
 
 	Start the project.
