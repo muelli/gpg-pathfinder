@@ -21,6 +21,7 @@ def find_path(target, trusted, forbidden_keys = []):
     if line != "hello\n":
         print "Bad hello from keyserver:", line
 
+    print "Connected to keyfetcher"
 
     # Get the start- and endpoint.  We really, really need them.
     pending = []
