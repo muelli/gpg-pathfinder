@@ -1,5 +1,9 @@
 2006-12-04  Per Cederqvist  <ceder@lysator.liu.se>
 
+	Update doc with the change Jörgen made 2003-02-26.
+	* README: The trusted setting is now in gpgpathconfig.py, not
+	findpath.py.
+
 	Minor doc fix.
 	* README: Fixed typo.
 
