@@ -1,3 +1,22 @@
+2006-12-04  Per Cederqvist  <ceder@moria.cederqvist>
+
+	Make findpath slightly nicer.
+	* findpath.py (find_path): Print a message when connected to the
+	keyfetcher.
+
+	The keyfetcher should not die just because a client dies.
+	* keyfetcher.py (toploop): Survive an ECONNRESET.
+
+	Use subkeys.pgp.net as the default keyserver.
+	* gpgpathconfig.py (keyserver): Use subkeys.pgp.net.
+
+	Doc improvements.
+	* README: Document the needed mysql access rights.
+
+	Don't accidentally recreate the database.
+	* Makefile.am (all): New target.  Do nothing.  This is to avoid
+	having recreate_db as the default makefile target...
+
 2003-02-26  Jörgen Cederlöf  <jc@lysator.liu.se>
 
 	Moved the `trusted' configuration value to the configuration file.
