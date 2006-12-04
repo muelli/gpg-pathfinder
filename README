@@ -46,13 +46,12 @@ The last step creates all MySQL tables used by this system.  It starts
 by dropping the database, so make sure you don't have a database named
 "gpgpathfinder" that contains anything useful.
 
-Edit findpath.py.  Near the end, you will find this line:
+Edit gpgpathconfig.py.  Near the end, you will find this line:
 
     trusted = 0xD294608EL
 
-Replace it with the key ID of your own key.
-
-Edit gpgpathconfig.py.
+Replace it with the key ID of your own key.  You may also want to
+change the keyserver to your favourite keyserver.
 
 You might want to populate your cache with some initial data.
 
