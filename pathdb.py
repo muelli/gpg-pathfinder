@@ -264,7 +264,9 @@ def extend_target(task, target_dist):
                    ' (taskno, key_id, signed_by, distance)'
                    
                    ' select %s, sig.key_id, sig.signed_by, %s'
-                   ' from key_sigs sig, task_target target'
+                   ' from key_sigs sig'
+
+                   ' join task_target target'
 
                    ' left join task_target old_target'
                    ' on sig.signed_by = old_target.signed_by'
@@ -301,7 +303,9 @@ def extend_trust(task, trust_dist):
                    ' (taskno, key_id, signed_by, distance)'
 
                    ' select %s, sig.key_id, sig.signed_by, %s'
-                   ' from key_sigs sig, task_trusted trust'
+                   ' from key_sigs sig'
+
+                   ' join task_trusted trust'
 
                    ' left join task_trusted old_trust'
                    ' on sig.key_id = old_trust.key_id'
