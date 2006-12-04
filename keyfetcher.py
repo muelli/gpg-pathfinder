@@ -1,6 +1,7 @@
 import string
 import select
 import socket
+import errno
 
 import gpgpathconfig
 import pathdb
@@ -57,8 +58,14 @@ def toploop(listenfd):
                 tasks[t] = None
         for t in tasks.keys():
             if sessions.has_key(t):
-                sessions[t].send("0x%08X" % key_id)
-        
+                try:
+                    sessions[t].send("0x%08X" % key_id)
+                except socket.error, e:
+                    if e.error == errno.ECONNRESET:
+                        print "Got ECONNRESET"
+                        pass
+                    else:
+                        raise
     
 
 def start():
