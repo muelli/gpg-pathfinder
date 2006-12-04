@@ -23,7 +23,7 @@ keyservers.  When a path is requested, an attempt is first made to
 find the key in this cache.  If that fails, one key at a time will be
 fetched from a keyserver, inserted into the database, and a new
 attempt to find a path will be made.  (This is done in an incremental
-way, so the attempt to find a new path it is fairly efficient.)
+way, so the attempt to find a new path is fairly efficient.)
 
 Installation
 ------------
