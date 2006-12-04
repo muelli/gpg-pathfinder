@@ -1,5 +1,10 @@
 2006-12-04  Per Cederqvist  <ceder@lysator.liu.se>
 
+	Fixed broken SQL syntax.
+	* pathdb.py (extend_target): Fixed broken SQL syntax which failed
+	with MySQL 5.0.12 and newer.
+	(extend_trust): Ditto.
+
 	Update doc with the change Jörgen made 2003-02-26.
 	* README: The trusted setting is now in gpgpathconfig.py, not
 	findpath.py.
