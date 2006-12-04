@@ -20,6 +20,8 @@
 MYSQL = @MYSQL@
 PYTHON = @PYTHON@
 
+all:
+
 recreate_db: Makefile $(srcdir)/sqltypes.sed $(srcdir)/createdb.sql
 	sed -f $(srcdir)/sqltypes.sed < $(srcdir)/createdb.sql \
 		| $(MYSQL)
