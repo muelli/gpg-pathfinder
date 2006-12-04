@@ -30,6 +30,11 @@ Installation
 
 First, install MySQL and the Python module MySQLdb.  
 
+You need to give full rights to the gpgpathfinder database to the user
+that runs these scripts:
+
+    mysql> grant all on gpgpathfinder.* to ceder@localhost;
+
 If you got this code from the CVS repository, run these commands:
 
     ./bootstrap.sh
