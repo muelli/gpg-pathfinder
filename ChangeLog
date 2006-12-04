@@ -1,4 +1,7 @@
-2006-12-04  Per Cederqvist  <ceder@moria.cederqvist>
+2006-12-04  Per Cederqvist  <ceder@lysator.liu.se>
+
+	Minor doc fix.
+	* README: Fixed typo.
 
 	Make findpath slightly nicer.
 	* findpath.py (find_path): Print a message when connected to the
